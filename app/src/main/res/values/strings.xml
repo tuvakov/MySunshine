@@ -27,6 +27,9 @@
     <!--Used in overflow menu to refresh weather data-->
     <string name="action_refresh">Refresh</string>
 
+    <!--Used in overflow menu to go map location-->
+    <string name="action_map">Map Location</string>
+
     <!--Used in overflow menu to share weather data-->
     <string name="action_share_weather">Share Weather Details</string>
 
