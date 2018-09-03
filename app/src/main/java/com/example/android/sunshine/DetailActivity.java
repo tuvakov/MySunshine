@@ -56,6 +56,10 @@ public class DetailActivity extends AppCompatActivity {
             case R.id.action_share_weather:
                 shareWeatherData();
                 return true;
+            case R.id.action_settings:
+                Intent intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                return true;
         }
 
         return super.onOptionsItemSelected(item);

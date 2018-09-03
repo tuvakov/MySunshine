@@ -274,10 +274,13 @@ public class MainActivity extends AppCompatActivity
 
             return true;
         }
-
-        if (id == R.id.action_map){
+        else if (id == R.id.action_map){
             openMapLocation();
             return true;
+        }
+        else if (id == R.id.action_settings){
+            Intent intent = new Intent(this, SettingsActivity.class);
+            startActivity(intent);
         }
 
         return super.onOptionsItemSelected(item);
