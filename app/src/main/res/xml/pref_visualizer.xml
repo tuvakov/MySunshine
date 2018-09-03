@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <!-- Preference for entering location option (for fetching the weather data) -->
+    <EditTextPreference
+        android:defaultValue="@string/pref_location_default"
+        android:key="@string/pref_location_key"
+        android:title="@string/pref_location_label"
+        />
+
+    <!-- Preference for selecting preferred unit -->
+    <ListPreference
+        android:defaultValue="@string/pref_units_metric"
+        android:key="@string/pref_units_key"
+        android:title="@string/pref_units_label"
+        android:entries="@array/pref_units_options"
+        android:entryValues="@array/pref_units_values"/>
+
+</PreferenceScreen>
