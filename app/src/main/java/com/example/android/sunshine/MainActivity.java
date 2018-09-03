@@ -196,7 +196,7 @@ public class MainActivity extends AppCompatActivity
                     // Set the indicator visible
                     mLoadingIndicator.setVisibility(View.VISIBLE);
                     Log.v("my_tag", "Loaded");
-                    //forceLoad();
+                    forceLoad();
                 }
             }
 
