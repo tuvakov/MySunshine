@@ -15,6 +15,8 @@
  */
 package com.example.android.sunshine;
 
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -44,9 +46,10 @@ import java.net.URL;
 
 public class MainActivity extends AppCompatActivity
         implements ForecastAdapterOnClickHandler,
-        LoaderManager.LoaderCallbacks<String[]>{
+        LoaderManager.LoaderCallbacks<String[]>, SharedPreferences.OnSharedPreferenceChangeListener{
 
     private final String TAG = this.getClass().getSimpleName();
+    private static boolean PREFERENCE_UPDATED = false;
 
     // Id for the loader
     private final int WEATHER_LOADER_ID = 19;
@@ -108,8 +111,29 @@ public class MainActivity extends AppCompatActivity
 
         /* Once all of our views are setup, we can load the weather data. */
         getSupportLoaderManager().initLoader(WEATHER_LOADER_ID, null, this);
+
+        // Register the OnSharedPreferencesClickListener
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
     }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        /* If a preference updated then reload the data and reset the flag */
+        if (PREFERENCE_UPDATED) {
+            refreshData();
+            PREFERENCE_UPDATED = false;
+        }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        // Unregister the OnSharedPreferencesClickListener
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
+    }
 
     /**
      * This method is overridden by our MainActivity class in order to handle RecyclerView item
@@ -158,8 +182,8 @@ public class MainActivity extends AppCompatActivity
     }
 
     private void openMapLocation() {
-        // Hardcoded the location
-        String address = "1600 Ampitheatre Parkway, CA";
+        // Get location from SharedPreferences
+        String address = SunshinePreferences.getPreferredWeatherLocation(this);
 
         // Parsing the address to an Uri object
         Uri locationUri = Uri.parse("geo:0,0?q=" + address);
@@ -262,16 +286,13 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
 
         if (id == R.id.action_refresh) {
-            mForecastAdapter.setWeatherData(null);
-
-            // Restart the loader
-            getSupportLoaderManager().restartLoader(WEATHER_LOADER_ID, null, this);
-
+            refreshData();
             return true;
         }
         else if (id == R.id.action_map){
@@ -284,5 +305,19 @@ public class MainActivity extends AppCompatActivity
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    /* When a preference changed set the flag true
+     */
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+        PREFERENCE_UPDATED = true;
+    }
+
+    /* After deleting adapter data reloads data from the net */
+    private void refreshData(){
+        mForecastAdapter.setWeatherData(null);
+        // Restart the loader
+        getSupportLoaderManager().restartLoader(WEATHER_LOADER_ID, null, this);
     }
 }
