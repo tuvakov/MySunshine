@@ -15,8 +15,13 @@
  */
 package com.example.android.sunshine;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
+import android.support.annotation.MainThread;
+import android.support.annotation.Nullable;
 import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
@@ -39,14 +44,19 @@ import android.widget.Toast;
 
 import com.example.android.sunshine.ForecastAdapter.ForecastAdapterOnClickHandler;
 import com.example.android.sunshine.data.SunshinePreferences;
+import com.example.android.sunshine.data.database.AppDatabase;
+import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.utilities.NetworkUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
+import com.example.android.sunshine.utilities.SunshineDateUtils;
+import com.example.android.sunshine.utilities.SunshineWeatherUtils;
 
 import java.net.URL;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity
         implements ForecastAdapterOnClickHandler,
-        LoaderManager.LoaderCallbacks<String[]>, SharedPreferences.OnSharedPreferenceChangeListener{
+        SharedPreferences.OnSharedPreferenceChangeListener{
 
     private final String TAG = this.getClass().getSimpleName();
     private static boolean PREFERENCE_UPDATED = false;
@@ -109,8 +119,8 @@ public class MainActivity extends AppCompatActivity
          */
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
-        /* Once all of our views are setup, we can load the weather data. */
-        getSupportLoaderManager().initLoader(WEATHER_LOADER_ID, null, this);
+        /* Loading the data from view model*/
+        loadDataFromViewModel();
 
         // Register the OnSharedPreferencesClickListener
         PreferenceManager.getDefaultSharedPreferences(this)
@@ -200,68 +210,55 @@ public class MainActivity extends AppCompatActivity
         }
     }
 
-    @Override
-    public Loader<String[]> onCreateLoader(int id, Bundle args) {
-        return new AsyncTaskLoader<String[]>(this) {
 
-            String[] mWeatherData;
+    /* Loads data from the MainViewModel */
+    private void loadDataFromViewModel(){
+        // Get the MainViewModel
+        MainViewModel mainViewModel = ViewModelProviders.of(this).get(MainViewModel.class);
 
+        // Get the weather data
+        final LiveData<List<WeatherEntry>> weatherEntries = mainViewModel.getWeatherEntries();
+
+        /* Assign an Observer to the LiveData object
+         * Update UI when the data changes.
+         * The data changed supposed to happen when the Services update DB
+         * TODO: Services will be implemented later.
+         */
+        weatherEntries.observe(this, new Observer<List<WeatherEntry>>() {
             @Override
-            protected void onStartLoading() {
-                super.onStartLoading();
-
-                // If the data already cached then return that
-                if (mWeatherData != null){
-                    deliverResult(mWeatherData);
-                    //Log.v("my_tag", "Delivered");
-                }
-                // Load the data
-                else{
-                    // Set the indicator visible
-                    mLoadingIndicator.setVisibility(View.VISIBLE);
-                    Log.v("my_tag", "Loaded");
-                    forceLoad();
-                }
+            public void onChanged(@Nullable List<WeatherEntry> entries) {
+                // Prepare data to show in MainActivity UI
+                String[] preparedData = prepareWeatherData(entries);
+                // Update UI
+                mForecastAdapter.setWeatherData(preparedData);
+                Log.d(TAG, "DB update from LiveData in ViewModel");
             }
-
-            @Override
-            public String[] loadInBackground() {
-                // Get the location first
-                String location = SunshinePreferences.getPreferredWeatherLocation(MainActivity.this);
-
-                // Make URL
-                URL weatherRequestUrl = NetworkUtils.buildUrl(location);
-
-                try {
-                    // Fetch data
-                    String jsonWeatherResponse = NetworkUtils
-                            .getResponseFromHttpUrl(weatherRequestUrl);
-
-                    // Parse the fetched JSON
-                    String[] simpleJsonWeatherData = OpenWeatherJsonUtils
-                            .getSimpleWeatherStringsFromJson(MainActivity.this, jsonWeatherResponse);
-
-                    return simpleJsonWeatherData;
-
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-            }
-
-            @Override
-            public void deliverResult(String[] data) {
-                mWeatherData = data;
-                super.deliverResult(data);
-            }
-        };
+        });
     }
 
-    @Override
+    /* Gets WeatherEntry objects and makes a String for e/ach entry */
+    private String[] prepareWeatherData(List<WeatherEntry> entries){
+
+        String[] data = new String[entries.size()];
+        String date;
+        String highAndLow;
+
+        int i = 0;
+        for (WeatherEntry entry: entries) {
+            highAndLow = SunshineWeatherUtils.formatHighLows(this, entry.getMax(),
+                    entry.getMin());
+            date = SunshineDateUtils.getFriendlyDateString(this, entry.getDate(), false);
+            data[i++] = date + " - " + entry.getDescription() + " - " + highAndLow;
+        }
+
+        return data;
+    }
+
+    /* TODO: Set the indicator visible before loading
+             mLoadingIndicator.setVisibility(View.VISIBLE);
+
     public void onLoadFinished(Loader<String[]> loader, String[] weatherData) {
-        /*
-            Make the loadingIndicator invisible and show the data if it's fetched properly.
-         */
+
         mLoadingIndicator.setVisibility(View.INVISIBLE);
         if (weatherData != null) {
             showWeatherDataView();
@@ -270,11 +267,7 @@ public class MainActivity extends AppCompatActivity
             showErrorMessage();
         }
     }
-
-    @Override
-    public void onLoaderReset(Loader<String[]> loader) {
-
-    }
+    */
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -317,7 +310,8 @@ public class MainActivity extends AppCompatActivity
     /* After deleting adapter data reloads data from the net */
     private void refreshData(){
         mForecastAdapter.setWeatherData(null);
+        // TODO: This should be fixed.
         // Restart the loader
-        getSupportLoaderManager().restartLoader(WEATHER_LOADER_ID, null, this);
+        //getSupportLoaderManager().restartLoader(WEATHER_LOADER_ID, null, this);
     }
 }

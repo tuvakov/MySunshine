@@ -1,5 +1,6 @@
 package com.example.android.sunshine.data.database;
 
+import android.arch.lifecycle.LiveData;
 import android.arch.persistence.room.Dao;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
@@ -19,7 +20,7 @@ public interface WeatherDao {
      * @return List of all {@link WeatherEntry} objects after date
      */
     @Query("SELECT * FROM weather WHERE date >= :date")
-    List<WeatherEntry> getWeatherForecasts(long date);
+    LiveData<List<WeatherEntry>> getWeatherForecasts(long date);
 
 
     /**
@@ -29,7 +30,7 @@ public interface WeatherDao {
      * @return {@link WeatherEntry} with weather for a single day
      */
     @Query("SELECT * FROM weather WHERE date = :date")
-    WeatherEntry getWeatherByDate(long date);
+    LiveData<WeatherEntry> getWeatherByDate(long date);
 
     /**
      * Inserts a list of {@link WeatherEntry} into the weather table. If there is a conflicting id

@@ -53,9 +53,6 @@
     <string name="tomorrow">Tomorrow</string>
 
     <!-- Date format [CHAR LIMIT=NONE] -->
-    <string name="format_full_friendly_date">
-        <xliff:g id="month">%1$s</xliff:g>, <xliff:g id="day">%2$s</xliff:g>
-    </string>
 
 
     <!-- - - - - - - - - - - - - - - -->
@@ -92,8 +89,6 @@
     <string name="condition_504">Extreme Rain</string>
     <string name="condition_511">Freezing Rain</string>
     <string name="condition_520">Light Shower</string>
-    <string name="condition_521">Shower</string>
-    <string name="condition_522">Heavy Shower</string>
     <string name="condition_531">Ragged Shower</string>
     <string name="condition_600">Light Snow</string>
     <string name="condition_601">Snow</string>
