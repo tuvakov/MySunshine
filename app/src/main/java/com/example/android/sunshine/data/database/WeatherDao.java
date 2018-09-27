@@ -33,6 +33,15 @@ public interface WeatherDao {
     LiveData<WeatherEntry> getWeatherByDate(long date);
 
     /**
+     * Gets the weather for a single day
+     *
+     * @param id The id you want weather for
+     * @return {@link WeatherEntry} with weather for a single day
+     */
+    @Query("SELECT * FROM weather WHERE id = :id")
+    LiveData<WeatherEntry> getWeatherById(int id);
+
+    /**
      * Inserts a list of {@link WeatherEntry} into the weather table. If there is a conflicting id
      * or date the weather entry uses the {@link OnConflictStrategy} of replacing the weather
      * forecast. The required uniqueness of these values is defined in the {@link WeatherEntry}.

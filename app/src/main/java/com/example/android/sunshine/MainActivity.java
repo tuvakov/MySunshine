@@ -149,16 +149,16 @@ public class MainActivity extends AppCompatActivity
      * This method is overridden by our MainActivity class in order to handle RecyclerView item
      * clicks.
      *
-     * @param weatherForDay The weather for the day that was clicked
+     * @param weatherEntryId The weather entry id for the day that was clicked
      */
     @Override
-    public void onClick(String weatherForDay) {
+    public void onClick(int weatherEntryId) {
         Context context = this;
         /* Start DetailActivity */
         // Make an intent object
         Intent intent = new Intent(context, DetailActivity.class);
         // Put the weather data
-        intent.putExtra(Intent.EXTRA_TEXT, weatherForDay);
+        intent.putExtra(DetailActivity.INTENT_ID_KEY, weatherEntryId);
         // Start activity
         startActivity(intent);
     }
@@ -224,35 +224,13 @@ public class MainActivity extends AppCompatActivity
          * The data changed supposed to happen when the Services update DB
          * TODO: Services will be implemented later.
          */
-        weatherEntries.observe(this, new Observer<List<WeatherEntry>>() {
-            @Override
-            public void onChanged(@Nullable List<WeatherEntry> entries) {
-                // Prepare data to show in MainActivity UI
-                String[] preparedData = prepareWeatherData(entries);
-                // Update UI
-                mForecastAdapter.setWeatherData(preparedData);
-                Log.d(TAG, "DB update from LiveData in ViewModel");
-            }
+        weatherEntries.observe(this, entries -> {
+            // Update UI
+            mForecastAdapter.setWeatherData(entries);
+            Log.d(TAG, "DB update from LiveData in ViewModel");
         });
     }
 
-    /* Gets WeatherEntry objects and makes a String for e/ach entry */
-    private String[] prepareWeatherData(List<WeatherEntry> entries){
-
-        String[] data = new String[entries.size()];
-        String date;
-        String highAndLow;
-
-        int i = 0;
-        for (WeatherEntry entry: entries) {
-            highAndLow = SunshineWeatherUtils.formatHighLows(this, entry.getMax(),
-                    entry.getMin());
-            date = SunshineDateUtils.getFriendlyDateString(this, entry.getDate(), false);
-            data[i++] = date + " - " + entry.getDescription() + " - " + highAndLow;
-        }
-
-        return data;
-    }
 
     /* TODO: Set the indicator visible before loading
              mLoadingIndicator.setVisibility(View.VISIBLE);

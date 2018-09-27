@@ -1,18 +1,36 @@
 package com.example.android.sunshine;
 
+import android.arch.lifecycle.LiveData;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.support.annotation.Nullable;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.widget.TextView;
 
+import com.example.android.sunshine.data.database.AppDatabase;
+import com.example.android.sunshine.data.database.WeatherDao;
+import com.example.android.sunshine.data.database.WeatherEntry;
+import com.example.android.sunshine.utilities.SunshineDateUtils;
+import com.example.android.sunshine.utilities.SunshineWeatherUtils;
+
 public class DetailActivity extends AppCompatActivity {
+
+    // Log TAG
+    private final String TAG = this.getClass().getSimpleName();
 
     // String that holds weather data
     private String mWeatherText;
+    // String constant for Intent key
+    public static final String INTENT_ID_KEY = "weatherEntryId";
+    private final int DEFAULT_WEATHER_ENTRY_ID = 0;
+    private AppDatabase mDb;
     // Textview reference that displays weather data
     private TextView mWeatherTextView;
 
@@ -21,6 +39,9 @@ public class DetailActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_detail);
 
+        // Instantiate db
+        mDb = AppDatabase.getsInstance(getApplication().getBaseContext());
+
         // Set the textview
         mWeatherTextView = (TextView) findViewById(R.id.tv_weather_detail);
 
@@ -28,11 +49,36 @@ public class DetailActivity extends AppCompatActivity {
         Intent comingIntent = getIntent();
 
         // Check if it has the extra
-        if(comingIntent != null && comingIntent.hasExtra(Intent.EXTRA_TEXT)){
+        if(comingIntent != null && comingIntent.hasExtra(INTENT_ID_KEY)){
             // Get the extra
-            mWeatherText = comingIntent.getStringExtra(Intent.EXTRA_TEXT);
-            // Set the weather text to the textview
-            mWeatherTextView.setText(mWeatherText);
+            int weatherId = comingIntent.getIntExtra(INTENT_ID_KEY, DEFAULT_WEATHER_ENTRY_ID);
+
+            // ViewModelFactory
+            DetailViewModelFactory modelFactory = new DetailViewModelFactory(weatherId, mDb);
+
+            // ViewModel
+            DetailViewModel viewModel =
+                    ViewModelProviders.of(this, modelFactory).get(DetailViewModel.class);
+
+            // Get LiveData
+            final LiveData<WeatherEntry> weather = viewModel.getWeatherEntry();
+
+            weather.observe(this, new Observer<WeatherEntry>() {
+                @Override
+                public void onChanged(@Nullable WeatherEntry weatherEntry) {
+                    Log.d(TAG, "DB update from LiveData in ViewModel");
+                    // Set the weather text to the textview
+                    /* TODO: This part is temporary
+                    *        Gonna be updated later */
+                    String date = SunshineDateUtils.getFriendlyDateString(DetailActivity.this,
+                            weatherEntry.getDate(), false);
+                    String highLow = SunshineWeatherUtils.formatHighLows(DetailActivity.this,
+                            weatherEntry.getMin(), weatherEntry.getMax());
+                    mWeatherText = date + " - " + weatherEntry.getDescription() + " - " + highLow;
+                    mWeatherTextView.setText(mWeatherText);
+                }
+            });
+
         }
     }
 

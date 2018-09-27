@@ -23,13 +23,19 @@ import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.widget.TextView;
 
+import com.example.android.sunshine.data.database.WeatherEntry;
+import com.example.android.sunshine.utilities.SunshineDateUtils;
+import com.example.android.sunshine.utilities.SunshineWeatherUtils;
+
+import java.util.List;
+
 /**
  * {@link ForecastAdapter} exposes a list of weather forecasts to a
  * {@link android.support.v7.widget.RecyclerView}
  */
 public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.ForecastAdapterViewHolder> {
 
-    private String[] mWeatherData;
+    private List<WeatherEntry> mWeatherData;
 
     /*
      * An on-click handler that we've defined to make it easy for an Activity to interface with
@@ -41,7 +47,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      * The interface that receives onClick messages.
      */
     public interface ForecastAdapterOnClickHandler {
-        void onClick(String weatherForDay);
+        void onClick(int weatherEntryId);
     }
 
     /**
@@ -74,8 +80,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            String weatherForDay = mWeatherData[adapterPosition];
-            mClickHandler.onClick(weatherForDay);
+            // Pass the clicked weather entry's DB id.
+            mClickHandler.onClick(mWeatherData.get(adapterPosition).getId());
         }
     }
 
@@ -113,7 +119,9 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      */
     @Override
     public void onBindViewHolder(ForecastAdapterViewHolder forecastAdapterViewHolder, int position) {
-        String weatherForThisDay = mWeatherData[position];
+        // Prepare data to show in MainActivity UI
+        String weatherForThisDay = prepareWeatherData(forecastAdapterViewHolder.mWeatherTextView.getContext(),
+                mWeatherData.get(position));
         forecastAdapterViewHolder.mWeatherTextView.setText(weatherForThisDay);
     }
 
@@ -126,7 +134,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     @Override
     public int getItemCount() {
         if (null == mWeatherData) return 0;
-        return mWeatherData.length;
+        return mWeatherData.size();
     }
 
     /**
@@ -136,8 +144,35 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      *
      * @param weatherData The new weather data to be displayed.
      */
-    public void setWeatherData(String[] weatherData) {
+    public void setWeatherData(List<WeatherEntry> weatherData) {
         mWeatherData = weatherData;
         notifyDataSetChanged();
+    }
+
+    /* Gets a single WeatherEntry object and makes a String for it */
+    private String prepareWeatherData(Context context, WeatherEntry entry){
+        String date;
+        String highAndLow;
+
+        highAndLow = SunshineWeatherUtils.formatHighLows(context, entry.getMax(), entry.getMin());
+        date = SunshineDateUtils.getFriendlyDateString(context, entry.getDate(), false);
+        return date + " - " + entry.getDescription() + " - " + highAndLow;
+    }
+
+    /* Gets WeatherEntry objects and makes a String for each entry */
+    private String[] prepareWeatherDataSet(Context context, List<WeatherEntry> entries){
+
+        String[] data = new String[entries.size()];
+        String date;
+        String highAndLow;
+
+        int i = 0;
+        for (WeatherEntry entry: entries) {
+            highAndLow = SunshineWeatherUtils.formatHighLows(context, entry.getMax(), entry.getMin());
+            date = SunshineDateUtils.getFriendlyDateString(context, entry.getDate(), false);
+            data[i++] = date + " - " + entry.getDescription() + " - " + highAndLow;
+        }
+
+        return data;
     }
 }
