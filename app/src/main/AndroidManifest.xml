@@ -25,6 +25,12 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
+
+        <!--This is required for immediate syncs -->
+        <service
+            android:name=".sync.SunshineSyncIntentService"
+            android:exported="false"/>
+
         <activity
             android:name=".MainActivity"
             android:label="@string/app_name"

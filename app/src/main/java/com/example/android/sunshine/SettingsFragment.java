@@ -1,5 +1,6 @@
 package com.example.android.sunshine;
 
+import android.app.Activity;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.v7.preference.CheckBoxPreference;
@@ -8,6 +9,9 @@ import android.support.v7.preference.ListPreference;
 import android.support.v7.preference.Preference;
 import android.support.v7.preference.PreferenceFragmentCompat;
 import android.support.v7.preference.PreferenceScreen;
+
+import com.example.android.sunshine.data.SunshinePreferences;
+import com.example.android.sunshine.utilities.SunshineSyncUtils;
 
 public class SettingsFragment extends PreferenceFragmentCompat
         implements SharedPreferences.OnSharedPreferenceChangeListener{
@@ -64,9 +68,21 @@ public class SettingsFragment extends PreferenceFragmentCompat
      */
     @Override
     public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
-        /* When a preference other than CheckboxPreference changed, then update the summaries */
         // Find preference
         Preference preference = findPreference(key);
+        // Get the fragment's activity
+        Activity activity = getActivity();
+
+        if (key.equals(getString(R.string.pref_location_key))) {
+            // we've changed the location
+            // Wipe out any potential PlacePicker latlng values so that we can use this text entry.
+            SunshinePreferences.resetLocationCoordinates(activity);
+            // Sync the weather if the location changes
+            SunshineSyncUtils.startImmediateSync(activity);
+        }
+
+
+        /* When a preference other than CheckboxPreference changed, then update the summaries */
         if (preference != null){
             if (!(preference instanceof CheckBoxPreference)){
                 setPrefSummaries(preference, sharedPreferences.getString(key, ""));

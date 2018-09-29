@@ -49,6 +49,7 @@ import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.utilities.NetworkUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 import com.example.android.sunshine.utilities.SunshineDateUtils;
+import com.example.android.sunshine.utilities.SunshineSyncUtils;
 import com.example.android.sunshine.utilities.SunshineWeatherUtils;
 
 import java.net.URL;
@@ -59,10 +60,8 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences.OnSharedPreferenceChangeListener{
 
     private final String TAG = this.getClass().getSimpleName();
-    private static boolean PREFERENCE_UPDATED = false;
+    private static boolean UNIT_PREFERENCE_UPDATED = false;
 
-    // Id for the loader
-    private final int WEATHER_LOADER_ID = 19;
 
     private RecyclerView mRecyclerView;
     private ForecastAdapter mForecastAdapter;
@@ -119,6 +118,9 @@ public class MainActivity extends AppCompatActivity
          */
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
+        /* Start sync */
+        SunshineSyncUtils.startImmediateSync(this.getApplicationContext());
+
         /* Loading the data from view model*/
         loadDataFromViewModel();
 
@@ -131,9 +133,10 @@ public class MainActivity extends AppCompatActivity
     protected void onStart() {
         super.onStart();
         /* If a preference updated then reload the data and reset the flag */
-        if (PREFERENCE_UPDATED) {
-            refreshData();
-            PREFERENCE_UPDATED = false;
+        if (UNIT_PREFERENCE_UPDATED) {
+            /* Notify the adapter since we've changed units */
+            mForecastAdapter.notifyDataSetChanged();
+            UNIT_PREFERENCE_UPDATED = false;
         }
     }
 
@@ -221,8 +224,7 @@ public class MainActivity extends AppCompatActivity
 
         /* Assign an Observer to the LiveData object
          * Update UI when the data changes.
-         * The data changed supposed to happen when the Services update DB
-         * TODO: Services will be implemented later.
+         * The data changed supposed to happen when the SyncIntentService updates DB
          */
         weatherEntries.observe(this, entries -> {
             // Update UI
@@ -278,18 +280,22 @@ public class MainActivity extends AppCompatActivity
         return super.onOptionsItemSelected(item);
     }
 
-    /* When a preference changed set the flag true
+    /*
+     * When a preference changed set the flag true
      */
     @Override
-    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
-        PREFERENCE_UPDATED = true;
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_units_key))) {
+            // units have changed. update lists of weather entries accordingly
+            UNIT_PREFERENCE_UPDATED = true;
+        }
     }
 
-    /* After deleting adapter data reloads data from the net */
+    /* After deleting adapter data resyncs data from the net */
     private void refreshData(){
         mForecastAdapter.setWeatherData(null);
-        // TODO: This should be fixed.
-        // Restart the loader
-        //getSupportLoaderManager().restartLoader(WEATHER_LOADER_ID, null, this);
+        // Resync the data
+        SunshineSyncUtils.startImmediateSync(this.getApplicationContext());
+
     }
 }
