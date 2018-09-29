@@ -119,7 +119,7 @@ public class MainActivity extends AppCompatActivity
         mLoadingIndicator = (ProgressBar) findViewById(R.id.pb_loading_indicator);
 
         /* Start sync */
-        SunshineSyncUtils.startImmediateSync(this.getApplicationContext());
+        SunshineSyncUtils.initialize(this.getApplicationContext());
 
         /* Loading the data from view model*/
         loadDataFromViewModel();
@@ -296,6 +296,5 @@ public class MainActivity extends AppCompatActivity
         mForecastAdapter.setWeatherData(null);
         // Resync the data
         SunshineSyncUtils.startImmediateSync(this.getApplicationContext());
-
     }
 }

@@ -63,11 +63,19 @@ public interface WeatherDao {
      * Selects all ids entries after a give date, inclusive. This is for easily seeing
      * what entries are in the database without pulling all of the data.
      *
+     * @return Number of future weather forecasts stored in the database
+     */
+    @Query("SELECT COUNT(id) FROM weather")
+    int countAll();
+
+    /**
+     * Selects all ids entries after a give date, inclusive. This is for easily seeing
+     * what entries are in the database without pulling all of the data.
+     *
      * @param date The date to select after (inclusive)
      * @return Number of future weather forecasts stored in the database
      */
     @Query("SELECT COUNT(id) FROM weather WHERE date >= :date")
     int countAllFutureWeather(long date);
-
 
 }
