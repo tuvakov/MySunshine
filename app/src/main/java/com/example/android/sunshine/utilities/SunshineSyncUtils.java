@@ -26,8 +26,10 @@ public class SunshineSyncUtils {
     // Interval at which to sync data
     private static final int REMINDER_INTERVAL_HOURS = 3;
     private static final int REMINDER_INTERVAL_SECONDS = (int) TimeUnit.HOURS.toSeconds(REMINDER_INTERVAL_HOURS);
+//    private static final int REMINDER_INTERVAL_SECONDS = 60;
     private static final int SYNC_FLEXTIME_MINUTES = 5;
     private static final int SYNC_FLEXTIME_SECONDS = (int) TimeUnit.MINUTES.toSeconds(SYNC_FLEXTIME_MINUTES);
+//    private static final int SYNC_FLEXTIME_SECONDS = 15;
 
     private static boolean sInitialized = false;
 

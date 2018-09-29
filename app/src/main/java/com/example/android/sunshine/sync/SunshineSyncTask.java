@@ -1,12 +1,15 @@
 package com.example.android.sunshine.sync;
 
 import android.content.Context;
+import android.support.v4.app.NotificationCompat;
+import android.text.format.DateUtils;
 import android.util.Log;
 
 import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.database.AppDatabase;
 import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.utilities.NetworkUtils;
+import com.example.android.sunshine.utilities.NotificationUtils;
 import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
 
 import java.net.URL;
@@ -22,10 +25,23 @@ public class SunshineSyncTask {
     /**
      * Method that is called from the SyncIntentService
      * Basically, it calls a private method that fetches data from the net and inserts it to the DB
+     * If the notification constraints match, then it shows notification
      * @param context
      */
     public static void syncWeather(Context context){
         fetchAndInsertData(context);
+
+        // Check if notifications are enables
+        boolean areEnabled = SunshinePreferences.areNotificationsEnabled(context);
+
+        /* Check if a day has passed since the last notification */
+        long elapsedTime = SunshinePreferences.getEllapsedTimeSinceLastNotification(context);
+        boolean hasDayPassed = elapsedTime >= DateUtils.DAY_IN_MILLIS;
+//        boolean hasDayPassed = elapsedTime >= DateUtils.MINUTE_IN_MILLIS;
+
+        /* If both conditions met then show a notification */
+        if (areEnabled && hasDayPassed)
+            NotificationUtils.notifyUserOfNewWeather(context);
     }
 
     /**
