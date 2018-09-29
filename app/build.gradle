@@ -38,6 +38,8 @@ dependencies {
     implementation "android.arch.persistence.room:runtime:$lifecycle_version"
     annotationProcessor "android.arch.persistence.room:compiler:$lifecycle_version"
 
+    /* FireBase JobDispatcher Dependency */
+    implementation 'com.firebase:firebase-jobdispatcher:0.5.2'
 
     // Instrumentation dependencies use androidTestCompile
     // (as opposed to testCompile for local unit tests run in the JVM)
