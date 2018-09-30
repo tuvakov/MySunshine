@@ -32,13 +32,18 @@ public final class NetworkUtils {
 
     private static final String TAG = NetworkUtils.class.getSimpleName();
 
+    private static final String OWM_API_KEY = "d5c8b5e7cd9b9b58750bfb81b3043e8b";
+
+    private static final String OWM_BASE_URL =
+            "https://api.openweathermap.org/data/2.5/forecast/daily";
+
     private static final String DYNAMIC_WEATHER_URL =
             "https://andfun-weather.udacity.com/weather";
 
     private static final String STATIC_WEATHER_URL =
             "https://andfun-weather.udacity.com/staticweather";
 
-    private static final String FORECAST_BASE_URL = STATIC_WEATHER_URL;
+    private static final String FORECAST_BASE_URL = DYNAMIC_WEATHER_URL;
 
     /*
      * NOTE: These values only effect responses from OpenWeatherMap, NOT from the fake weather
@@ -55,6 +60,7 @@ public final class NetworkUtils {
     private static final int numDays = 14;
 
     final static String QUERY_PARAM = "q";
+    final static String API_KEY_PARAM = "appid";
     final static String LAT_PARAM = "lat";
     final static String LON_PARAM = "lon";
     final static String FORMAT_PARAM = "mode";
@@ -69,8 +75,9 @@ public final class NetworkUtils {
      * @return The URL to use to query the weather server.
      */
     public static URL buildUrl(String locationQuery) {
-        Uri builtUri = Uri.parse(FORECAST_BASE_URL).buildUpon()
+        Uri builtUri = Uri.parse(OWM_BASE_URL).buildUpon()
                 .appendQueryParameter(QUERY_PARAM, locationQuery)
+                .appendQueryParameter(API_KEY_PARAM, OWM_API_KEY)
                 .appendQueryParameter(FORMAT_PARAM, format)
                 .appendQueryParameter(UNITS_PARAM, units)
                 .appendQueryParameter(DAYS_PARAM, Integer.toString(numDays))

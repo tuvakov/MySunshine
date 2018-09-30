@@ -53,7 +53,6 @@ public class SunshineSyncTask {
         // Get the location first
         String location = SunshinePreferences.getPreferredWeatherLocation(context);
 
-        /* TODO: The mock URL should be changed and geniune OWM apis should be used */
         // Make URL
         URL weatherRequestUrl = NetworkUtils.buildUrl(location);
 
