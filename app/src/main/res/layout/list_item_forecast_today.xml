@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+- To emphesize today's weather in the RecyclerView this layout is used. It has bigger icon
+- and larger textviews
+-->
+<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:paddingBottom="16dp"
+    android:paddingTop="16dp">
+
+<!--
+- This Guideline divides the screen into a left half and a right half and is used to anchor the
+- views to the middle of the screen.
+-->
+    <android.support.constraint.Guideline
+        android:id="@+id/horizontal_middle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        app:layout_constraintGuide_percent="0.5"
+        tools:layout_editor_absoluteX="192dp"
+        tools:layout_editor_absoluteY="0dp"/>
+
+    <!-- TextView that holds today's date -->
+    <TextView
+        android:id="@+id/tv_date"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:textSize="20sp"
+        app:layout_constraintBottom_toTopOf="@+id/iv_weather_icon"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toRightOf="parent"
+        tools:text="Today, April 03"/>
+
+    <!-- ImageView for weather condition icon -->
+    <ImageView
+        android:id="@+id/iv_weather_icon"
+        android:layout_width="96dp"
+        android:layout_height="96dp"
+        android:adjustViewBounds="true"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintLeft_toLeftOf="parent"
+        app:layout_constraintRight_toLeftOf="@+id/horizontal_middle"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:src="@drawable/art_clouds"/>
+
+    <!-- TextView that describes weather condition -->
+    <TextView
+        android:id="@+id/tv_weather_description"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:textSize="20sp"
+        app:layout_constraintHorizontal_bias="0.52"
+        app:layout_constraintLeft_toLeftOf="@+id/iv_weather_icon"
+        app:layout_constraintRight_toRightOf="@+id/iv_weather_icon"
+        app:layout_constraintTop_toBottomOf="@+id/iv_weather_icon"
+        tools:text="Rainy"/>
+
+    <!-- High temperature for today -->
+    <TextView
+        android:id="@+id/tv_high_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="72sp"
+        app:layout_constraintBottom_toBottomOf="@+id/iv_weather_icon"
+        app:layout_constraintHorizontal_bias="0.45"
+        app:layout_constraintLeft_toLeftOf="@+id/horizontal_middle"
+        app:layout_constraintRight_toRightOf="parent"
+        app:layout_constraintTop_toTopOf="@+id/iv_weather_icon"
+        tools:text="19\u00b0"/>
+
+    <!-- High temperature for today -->
+    <TextView
+        android:id="@+id/tv_low_temperature"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="36sp"
+        app:layout_constraintBaseline_toBaselineOf="@+id/tv_weather_description"
+        app:layout_constraintLeft_toLeftOf="@+id/tv_high_temperature"
+        app:layout_constraintRight_toRightOf="@+id/tv_high_temperature"
+        tools:text="10\u00b0"/>
+
+</android.support.constraint.ConstraintLayout>
