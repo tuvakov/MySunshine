@@ -16,11 +16,13 @@
 package com.example.android.sunshine;
 
 import android.content.Context;
+import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.android.sunshine.data.database.WeatherEntry;
@@ -64,11 +66,24 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      * Cache of the children views for a forecast list item.
      */
     public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
-        public final TextView mWeatherTextView;
+
+        /* Instances for each text view and icon image view */
+        final TextView tvDate;
+        final TextView tvDescription;
+        final TextView tvHigh;
+        final TextView tvLow;
+        final ImageView ivWeatherIconView;
 
         public ForecastAdapterViewHolder(View view) {
             super(view);
-            mWeatherTextView = (TextView) view.findViewById(R.id.tv_weather_data);
+
+            /* Find views */
+            tvDate = (TextView) view.findViewById(R.id.tv_date);
+            tvDescription = (TextView) view.findViewById(R.id.tv_weather_description);
+            tvHigh = (TextView) view.findViewById(R.id.tv_high_temperature);
+            tvLow = (TextView) view.findViewById(R.id.tv_low_temperature);
+            ivWeatherIconView = (ImageView) view.findViewById(R.id.iv_weather_icon);
+
             view.setOnClickListener(this);
         }
 
@@ -119,10 +134,28 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      */
     @Override
     public void onBindViewHolder(ForecastAdapterViewHolder forecastAdapterViewHolder, int position) {
-        // Prepare data to show in MainActivity UI
-        String weatherForThisDay = prepareWeatherData(forecastAdapterViewHolder.mWeatherTextView.getContext(),
-                mWeatherData.get(position));
-        forecastAdapterViewHolder.mWeatherTextView.setText(weatherForThisDay);
+        Context context = forecastAdapterViewHolder.ivWeatherIconView.getContext();
+
+        /* Prepare data to show in MainActivity UI */
+        WeatherEntry weatherEntry = mWeatherData.get(position);
+
+        /* Get human readable string using our utility method */
+        String dateString = SunshineDateUtils.getFriendlyDateString(context, weatherEntry.getDate(), false);
+
+        /* Get icon id and set */
+        int weatherImageId = SunshineWeatherUtils
+                .getSmallArtResourceIdForWeatherCondition(weatherEntry.getWeatherId());
+        forecastAdapterViewHolder.ivWeatherIconView.setImageResource(weatherImageId);
+
+        /* Format temperatures */
+        String highString = SunshineWeatherUtils.formatTemperature(context, weatherEntry.getMax());
+        String lowString = SunshineWeatherUtils.formatTemperature(context, weatherEntry.getMin());
+
+        /* Set TextViews */
+        forecastAdapterViewHolder.tvDate.setText(dateString);
+        forecastAdapterViewHolder.tvDescription.setText(weatherEntry.getDescription());
+        forecastAdapterViewHolder.tvHigh.setText(highString);
+        forecastAdapterViewHolder.tvLow.setText(lowString);
     }
 
     /**

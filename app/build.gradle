@@ -30,6 +30,9 @@ dependencies {
     implementation 'com.android.support:recyclerview-v7:27.1.1'
     implementation 'com.android.support:preference-v7:27.1.1'
 
+    /* Dependency for ConstraintLayout */
+    implementation 'com.android.support.constraint:constraint-layout:1.0.2'
+
     /* AAC Dependencies */
     def lifecycle_version = "1.1.1"
     implementation "android.arch.lifecycle:runtime:$lifecycle_version"
