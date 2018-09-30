@@ -1,9 +1,11 @@
 package com.example.android.sunshine;
 
+import com.example.android.sunshine.databinding.ActivityDetailBinding;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.databinding.DataBindingUtil;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -25,25 +27,24 @@ public class DetailActivity extends AppCompatActivity {
     // Log TAG
     private final String TAG = this.getClass().getSimpleName();
 
-    // String that holds weather data
-    private String mWeatherText;
+    // String that holds weather data to share
+    private String mForecastSummary;
     // String constant for Intent key
     public static final String INTENT_ID_KEY = "weatherEntryId";
     private final int DEFAULT_WEATHER_ENTRY_ID = 0;
     private AppDatabase mDb;
-    // Textview reference that displays weather data
-    private TextView mWeatherTextView;
+
+    private ActivityDetailBinding mDetailBinding;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_detail);
+
+        /* Instantiate mDetailBinding */
+        mDetailBinding = DataBindingUtil.setContentView(this, R.layout.activity_detail);
 
         // Instantiate db
         mDb = AppDatabase.getsInstance(getApplication().getBaseContext());
-
-        // Set the textview
-        mWeatherTextView = (TextView) findViewById(R.id.tv_weather_detail);
 
         // Get intent
         Intent comingIntent = getIntent();
@@ -63,23 +64,53 @@ public class DetailActivity extends AppCompatActivity {
             // Get LiveData
             final LiveData<WeatherEntry> weather = viewModel.getWeatherEntry();
 
-            weather.observe(this, new Observer<WeatherEntry>() {
-                @Override
-                public void onChanged(@Nullable WeatherEntry weatherEntry) {
-                    Log.d(TAG, "DB update from LiveData in ViewModel");
-                    // Set the weather text to the textview
-                    /* TODO: This part is temporary
-                    *        Gonna be updated later */
-                    String date = SunshineDateUtils.getFriendlyDateString(DetailActivity.this,
-                            weatherEntry.getDate(), false);
-                    String highLow = SunshineWeatherUtils.formatHighLows(DetailActivity.this,
-                            weatherEntry.getMin(), weatherEntry.getMax());
-                    mWeatherText = date + " - " + weatherEntry.getDescription() + " - " + highLow;
-                    mWeatherTextView.setText(mWeatherText);
-                }
+            weather.observe(this, weatherEntry -> {
+                Log.d(TAG, "DB update from LiveData in ViewModel");
+                bindViews(weatherEntry);
             });
-
         }
+    }
+
+    private void bindViews(WeatherEntry weatherEntry) {
+
+        /* Read weather condition ID from the cursor (ID provided by Open Weather Map) */
+        int weatherId = weatherEntry.getWeatherId();
+        /* Use our utility method to determine the resource ID for the proper art */
+        int weatherImageId = SunshineWeatherUtils.getLargeArtResourceIdForWeatherCondition(weatherId);
+        /* Set the resource ID on the icon to display the art */
+        mDetailBinding.primaryInfo.ivWeatherIcon.setImageResource(weatherImageId);
+
+        /* Get user friendly date text and set */
+        String dateText = SunshineDateUtils.getFriendlyDateString(this, weatherEntry.getDate(), true);
+        mDetailBinding.primaryInfo.tvDate.setText(dateText);
+
+        // Weather description
+        mDetailBinding.primaryInfo.tvWeatherDescription.setText(weatherEntry.getDescription());
+
+        /* Format high/low temp and set accordingly */
+        String highString = SunshineWeatherUtils.formatTemperature(this, weatherEntry.getMax());
+        String lowString = SunshineWeatherUtils.formatTemperature(this, weatherEntry.getMin());
+        mDetailBinding.primaryInfo.tvHighTemperature.setText(highString);
+        mDetailBinding.primaryInfo.tvLowTemperature.setText(lowString);
+
+        /* Format humidity and set */
+        double humidity = weatherEntry.getHumidity();
+        String humidityString = getString(R.string.format_humidity, humidity);
+        mDetailBinding.extraDetails.tvHumidity.setText(humidityString);
+
+        /* Wind speed and direction */
+        float windDirection = (float) weatherEntry.getWindDirection();
+        float windSpeed = (float) weatherEntry.getWindSpeed();
+        String windString = SunshineWeatherUtils.getFormattedWind(this, windSpeed, windDirection);
+        mDetailBinding.extraDetails.tvWindMeasurement.setText(windString);
+
+        /* Pressure */
+        String pressureString = getString(R.string.format_pressure, weatherEntry.getPressure());
+        mDetailBinding.extraDetails.tvPressure.setText(pressureString);
+
+        /* Store the forecast summary String in our forecast summary field to share later */
+        mForecastSummary = String.format("%s - %s - %s/%s",
+                dateText, weatherEntry.getDescription(), highString, lowString);
     }
 
 
@@ -130,7 +161,7 @@ public class DetailActivity extends AppCompatActivity {
         Intent intent = ShareCompat.IntentBuilder.from(this)
                 .setChooserTitle(chooserTitle)
                 .setType(mimeType)
-                .setText(mWeatherText)
+                .setText(mForecastSummary)
                 .getIntent();
 
         // Make sure there is an app to handle this intent and start the intent
