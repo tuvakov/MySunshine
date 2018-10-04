@@ -20,24 +20,21 @@
             android:layout_height="wrap_content"
             android:orientation="vertical"
             app:layout_constraintGuide_percent="0.5"/>
+
         <!-- Humidity label -->
         <TextView
             android:id="@+id/tv_humidity_label"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
             android:text="@string/humidity_label"
-            android:fontFamily="sans-serif"
-            android:textColor="@color/detail_accent_label"
+            style="@style/DetailLabel"
             app:layout_constraintBottom_toTopOf="@+id/tv_pressure_label"
             app:layout_constraintLeft_toLeftOf="@+id/extra_details"
             app:layout_constraintTop_toTopOf="@+id/extra_details"
             app:layout_constraintVertical_bias="0.33"/>
+
         <!-- Humidity measurement -->
         <TextView
             android:id="@+id/tv_humidity"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textColor="@color/white"
+            style="@style/ExtraWeatherMeasurement"
             app:layout_constraintBottom_toBottomOf="@+id/tv_humidity_label"
             app:layout_constraintLeft_toLeftOf="@+id/horizontal_middle"
             tools:text="38%"/>
@@ -45,11 +42,8 @@
         <!-- Pressure label -->
         <TextView
             android:id="@+id/tv_pressure_label"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
             android:text="@string/pressure_label"
-            android:textColor="@color/detail_accent_label"
-            android:fontFamily="sans-serif"
+            style="@style/DetailLabel"
             app:layout_constraintBottom_toBottomOf="@+id/extra_details"
             app:layout_constraintLeft_toLeftOf="@+id/extra_details"
             app:layout_constraintTop_toTopOf="@+id/extra_details"/>
@@ -57,9 +51,7 @@
         <!-- Pressure measurement -->
         <TextView
             android:id="@+id/tv_pressure"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textColor="@color/white"
+            style="@style/ExtraWeatherMeasurement"
             app:layout_constraintBottom_toBottomOf="@+id/tv_pressure_label"
             app:layout_constraintLeft_toLeftOf="@+id/horizontal_middle"
             tools:text="995 hPa"/>
@@ -67,11 +59,8 @@
         <!-- Wind label -->
         <TextView
             android:id="@+id/tv_wind_label"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
             android:text="@string/wind_label"
-            android:textColor="@color/detail_accent_label"
-            android:fontFamily="sans-serif"
+            style="@style/DetailLabel"
             app:layout_constraintBottom_toBottomOf="@+id/extra_details"
             app:layout_constraintLeft_toLeftOf="@+id/extra_details"
             app:layout_constraintTop_toBottomOf="@+id/tv_pressure_label"
@@ -80,9 +69,7 @@
         <!-- Wind measurement -->
         <TextView
             android:id="@+id/tv_wind_measurement"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:textColor="@color/white"
+            style="@style/ExtraWeatherMeasurement"
             app:layout_constraintBottom_toBottomOf="@+id/tv_wind_label"
             app:layout_constraintLeft_toLeftOf="@+id/horizontal_middle"
             tools:text="4km/h NW"/>
