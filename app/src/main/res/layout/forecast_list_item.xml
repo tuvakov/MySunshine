@@ -14,11 +14,13 @@
  See the License for the specific language governing permissions and
  limitations under the License.
 -->
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
+<android.support.constraint.ConstraintLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@drawable/touch_selector"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
     android:minHeight="?android:attr/listPreferredItemHeight"
     android:paddingBottom="@dimen/list_item_padding_vertical"
     android:paddingLeft="@dimen/list_item_padding_horizontal"
