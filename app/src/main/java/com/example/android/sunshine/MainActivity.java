@@ -16,23 +16,17 @@
 package com.example.android.sunshine;
 
 import android.arch.lifecycle.LiveData;
-import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.annotation.MainThread;
-import android.support.annotation.Nullable;
-import android.support.v4.app.LoaderManager;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.support.v4.content.AsyncTaskLoader;
-import android.support.v4.content.Loader;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -44,15 +38,10 @@ import android.widget.Toast;
 
 import com.example.android.sunshine.ForecastAdapter.ForecastAdapterOnClickHandler;
 import com.example.android.sunshine.data.SunshinePreferences;
-import com.example.android.sunshine.data.database.AppDatabase;
 import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.utilities.NetworkUtils;
-import com.example.android.sunshine.utilities.OpenWeatherJsonUtils;
-import com.example.android.sunshine.utilities.SunshineDateUtils;
 import com.example.android.sunshine.utilities.SunshineSyncUtils;
-import com.example.android.sunshine.utilities.SunshineWeatherUtils;
 
-import java.net.URL;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity
@@ -60,6 +49,13 @@ public class MainActivity extends AppCompatActivity
         SharedPreferences.OnSharedPreferenceChangeListener{
 
     private final String TAG = this.getClass().getSimpleName();
+    private Toast mToast;
+
+    /*
+     * User will not be able to refresh the data before below interval passes
+     */
+    private int MANUAL_REFRESH_INTERVAL_IN_MINS = 30;
+
     private static boolean UNIT_PREFERENCE_UPDATED = false;
 
 
@@ -124,7 +120,7 @@ public class MainActivity extends AppCompatActivity
         /* Loading the data from view model*/
         loadDataFromViewModel();
 
-        // Register the OnSharedPreferencesClickListener
+        /* Register the OnSharedPreferencesClickListener */
         PreferenceManager.getDefaultSharedPreferences(this)
                 .registerOnSharedPreferenceChangeListener(this);
     }
@@ -230,6 +226,7 @@ public class MainActivity extends AppCompatActivity
             // Update UI
             mForecastAdapter.setWeatherData(entries);
             Log.d(TAG, "DB update from LiveData in ViewModel");
+            showAToast(getString(R.string.tm_loaded_data));
         });
     }
 
@@ -293,8 +290,38 @@ public class MainActivity extends AppCompatActivity
 
     /* After deleting adapter data resyncs data from the net */
     private void refreshData(){
-        mForecastAdapter.setWeatherData(null);
-        // Resync the data
-        SunshineSyncUtils.startImmediateSync(this.getApplicationContext());
+        /* Check if network is available */
+        if (!NetworkUtils.isNetworkAvailable(getBaseContext())){
+            showAToast(getString(R.string.tm_network_error));
+            return;
+        }
+
+        /* Check if 30 minutes passed since the last resync */
+        long elapsedTime = SunshinePreferences.getEllapsedTimeSinceLastSync(this);
+        boolean hasThirtyMinPassed = elapsedTime >= DateUtils.MINUTE_IN_MILLIS * MANUAL_REFRESH_INTERVAL_IN_MINS;
+        /* If 30 mins passed resync the data */
+        if(hasThirtyMinPassed){
+            mForecastAdapter.setWeatherData(null);
+            SunshineSyncUtils.startImmediateSync(this.getApplicationContext());
+            SunshinePreferences.saveLastSyncTime(this, System.currentTimeMillis());
+        }
+        else{
+            showAToast(getString(R.string.tm_sync_constraint, MANUAL_REFRESH_INTERVAL_IN_MINS));
+        }
+
+    }
+
+    /**
+     * Method to show Toast messages.
+     * It checks if there is an active toast message. If so it cancels that shows new one.
+     * @param message String object that keeps message.
+     */
+    private void showAToast (String message){
+        if (mToast != null) {
+            mToast.cancel();
+        }
+        mToast = Toast.makeText(this, message, Toast.LENGTH_SHORT);
+        mToast.show();
     }
 }
+

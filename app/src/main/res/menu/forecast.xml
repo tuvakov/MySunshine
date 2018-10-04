@@ -21,6 +21,7 @@
       tools:context=".MainActivity">
     <item
         android:id="@+id/action_refresh"
+        android:icon="@drawable/ic_outline_autorenew_24px"
         android:orderInCategory="1"
         android:title="@string/action_refresh"
         app:showAsAction="ifRoom"/>

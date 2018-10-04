@@ -31,13 +31,16 @@ public class SunshineSyncTask {
     public static void syncWeather(Context context){
         fetchAndInsertData(context);
 
+        // Save the synced time
+        SunshinePreferences.saveLastSyncTime(context, System.currentTimeMillis());
+        Log.d(TAG, "Saved the last sync time");
+
         // Check if notifications are enables
         boolean areEnabled = SunshinePreferences.areNotificationsEnabled(context);
 
         /* Check if a day has passed since the last notification */
         long elapsedTime = SunshinePreferences.getEllapsedTimeSinceLastNotification(context);
         boolean hasDayPassed = elapsedTime >= DateUtils.DAY_IN_MILLIS;
-//        boolean hasDayPassed = elapsedTime >= DateUtils.MINUTE_IN_MILLIS;
 
         /* If both conditions met then show a notification */
         if (areEnabled && hasDayPassed)

@@ -164,12 +164,12 @@
     <string name="pref_location_key" translatable="false">location</string>
 
     <!-- Default postal code for location preference [CHAR LIMIT=NONE] -->
-    <string name="pref_location_default" translatable="false">Mountain View, CA 94043</string>
+    <string name="pref_location_default" translatable="false">Seoul,KR</string>
 
     <!-- Label for the temperature units preference [CHAR LIMIT=30] -->
     <string name="pref_units_label">Temperature Units</string>
 
-    <!-- Label for metric option in temperature unit preference [CHAR LIMIT=25] -->
+    <!-- Label for metric option in temperature unit preference [CHAR LIMIT=25] -->`
     <string name="pref_units_label_metric">Metric</string>
 
     <!-- Label for imperial option in temperature unit preference [CHAR LIMIT=25] -->
@@ -204,10 +204,12 @@
 
     <string name="main_notification_channel_name">main_noti_channel</string>
     <string name="pref_last_notification">last_notification</string>
+    <string name="pref_last_sync">last_sync</string>
     <string name="notification_second_title">Just Synced Weather Data</string>
     <string name="humidity_label">Humidity</string>
     <string name="pressure_label">Pressure</string>
     <string name="wind_label">Wind</string>
+
     <string name="format_humidity">
         <xliff:g id="humidity">%1.0f</xliff:g> %%
     </string>
@@ -216,4 +218,10 @@
     </string>
 
 
+    <!-- Toast messages -->
+    <string name="tm_sync_constraint">
+        <xliff:g id="sync-cons-message" example="30">Cannot sync before %d minutes </xliff:g>
+    </string>
+    <string name="tm_network_error">Network is not available</string>
+    <string name="tm_loaded_data">Loaded weather data</string>
 </resources>

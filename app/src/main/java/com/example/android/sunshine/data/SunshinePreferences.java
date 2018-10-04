@@ -23,11 +23,8 @@ import com.example.android.sunshine.R;
 
 public class SunshinePreferences {
 
-    /*
-     * Human readable location string, provided by the API.  Because for styling,
-     * "Mountain View" is more recognizable than 94043.
-     */
-    public static final String PREF_CITY_NAME = "city_name";
+
+    public static final String PREF_CITY_NAME = "Seoul";
 
     /*
      * In order to uniquely pinpoint the location on the map when we launch the
@@ -37,14 +34,14 @@ public class SunshinePreferences {
     public static final String PREF_COORD_LONG = "coord_long";
 
     /*
-     * Before you implement methods to return your REAL preference for location,
-     * we provide some default values to work with.
+     * Set default location as Seoul, KR and its coordination as default coordination
      */
-    private static final String DEFAULT_WEATHER_LOCATION = "94043,USA";
-    private static final double[] DEFAULT_WEATHER_COORDINATES = {37.4284, 122.0724};
+    private static final String DEFAULT_WEATHER_LOCATION = "Seoul,KR";
+    private static final double[] DEFAULT_WEATHER_COORDINATES = {37.5665, 126.9780};
 
+    /* Set Seoul city office as default map location. */
     private static final String DEFAULT_MAP_LOCATION =
-            "1600 Amphitheatre Parkway, Mountain View, CA 94043";
+            "서울 중구 세종대로 110";
 
     /**
      * Helper method to handle setting location details in Preferences (City Name, Latitude,
@@ -223,6 +220,7 @@ public class SunshinePreferences {
         editor.apply();
     }
 
+
     /**
      * Returns true if the user prefers to see notifications from Sunshine, false otherwise. This
      * preference can be changed by the user within the SettingsFragment.
@@ -248,4 +246,63 @@ public class SunshinePreferences {
                 .getBoolean(displayNotificationsKey, shouldDisplayNotificationsByDefault);
         return shouldDisplayNotifications;
     }
+
+    /**
+     * Returns the last time that a sync occurred (in UNIX time)
+     *
+     * @param context Used to access SharedPreferences
+     * @return UNIX time of when the last occurred
+     */
+    public static long getLastSyncTimeInMillis(Context context) {
+        /* Key for accessing the time at which Sunshine last synced the db */
+        String lastSyncKey = context.getString(R.string.pref_last_sync);
+
+        /* As usual, we use the default SharedPreferences to access the user's preferences */
+        SharedPreferences sp = android.preference.PreferenceManager.getDefaultSharedPreferences(context);
+
+        /*
+         * Here, we retrieve the time in milliseconds when the last sync was occurred. If
+         * SharedPreferences doesn't have a value for lastSyncKey, we return 0. The reason
+         * we return 0 is because we compare the value returned from this method to the current
+         * system time. If the difference between the last sync time and the current time
+         * is greater than 30 minutes, we will allow another sync. When we compare the two
+         * values, we subtract the last sync time from the current system time. If the
+         * time of the last sync time was 0, the difference will always be greater than the
+         * number of milliseconds in 30 minutes and we will allow another sync.
+         */
+        long lastSyncTime = sp.getLong(lastSyncKey, 0);
+
+        return lastSyncTime;
+    }
+
+    /**
+     * Returns the elapsed time in milliseconds since the last sync was occurred. This is used
+     * as part of our check to see if we should allow another sync when the user clicks refresh button
+     * updated.
+     *
+     * @param context Used to access SharedPreferences as well as use other utility methods
+     * @return Elapsed time in milliseconds since the last sync was occurred
+     */
+    public static long getEllapsedTimeSinceLastSync(Context context) {
+        long lastSyncTimeInMillis =
+                SunshinePreferences.getLastSyncTimeInMillis(context);
+        long timeSinceLastSync = System.currentTimeMillis() - lastSyncTimeInMillis;
+        return timeSinceLastSync;
+    }
+
+    /**
+     * Saves the time that a sync is occurred. This will be used to get the ellapsed time
+     * since a sync was occurred.
+     *
+     * @param context Used to access SharedPreferences
+     * @param timeOfSync Time of last sync to save (in UNIX time)
+     */
+    public static void saveLastSyncTime(Context context, long timeOfSync) {
+        SharedPreferences sp = android.preference.PreferenceManager.getDefaultSharedPreferences(context);
+        SharedPreferences.Editor editor = sp.edit();
+        String lastSyncKey = context.getString(R.string.pref_last_sync);
+        editor.putLong(lastSyncKey, timeOfSync);
+        editor.apply();
+    }
+
 }
