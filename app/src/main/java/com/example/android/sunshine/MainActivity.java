@@ -15,6 +15,7 @@
  */
 package com.example.android.sunshine;
 
+import android.app.ActionBar;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.SharedPreferences;
@@ -26,6 +27,7 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.support.v7.widget.Toolbar;
 import android.text.format.DateUtils;
 import android.util.Log;
 import android.view.Menu;
@@ -70,6 +72,9 @@ public class MainActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_forecast);
+
+        android.support.v7.app.ActionBar toolbar = getSupportActionBar();
+        toolbar.setElevation((float) 0.1);
 
         /*
          * Using findViewById, we get a reference to our RecyclerView from xml. This allows us to
