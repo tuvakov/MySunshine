@@ -30,7 +30,7 @@ public interface WeatherDao {
      * @return {@link WeatherEntry} with weather for a single day
      */
     @Query("SELECT * FROM weather WHERE date = :date")
-    WeatherEntry getWeatherByDate(long date);
+    LiveData<WeatherEntry> getWeatherByDate(long date);
 
     /**
      * Gets the weather for a single day

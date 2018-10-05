@@ -16,6 +16,7 @@
 package com.example.android.sunshine;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.constraint.ConstraintLayout;
 import android.support.v7.widget.RecyclerView;
@@ -26,6 +27,7 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.utilities.SunshineDateUtils;
 import com.example.android.sunshine.utilities.SunshineWeatherUtils;
@@ -58,7 +60,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
      * The interface that receives onClick messages.
      */
     public interface ForecastAdapterOnClickHandler {
-        void onClick(int weatherEntryId);
+        void onClick(long weatherEntryDate);
     }
 
     /**
@@ -80,6 +82,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
     public class ForecastAdapterViewHolder extends RecyclerView.ViewHolder implements OnClickListener {
 
         /* Instances for each text view and icon image view */
+        final TextView tvLocation;
         final TextView tvDate;
         final TextView tvDescription;
         final TextView tvHigh;
@@ -90,6 +93,7 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
             super(view);
 
             /* Find views */
+            tvLocation = (TextView) view.findViewById(R.id.tv_location);
             tvDate = (TextView) view.findViewById(R.id.tv_date);
             tvDescription = (TextView) view.findViewById(R.id.tv_weather_description);
             tvHigh = (TextView) view.findViewById(R.id.tv_high_temperature);
@@ -107,8 +111,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         @Override
         public void onClick(View v) {
             int adapterPosition = getAdapterPosition();
-            // Pass the clicked weather entry's DB id.
-            mClickHandler.onClick(mWeatherData.get(adapterPosition).getId());
+            // Pass the clicked weather entry's date.
+            mClickHandler.onClick(mWeatherData.get(adapterPosition).getDate());
         }
     }
 
@@ -163,6 +167,9 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
         /* Get human readable string using our utility method */
         String dateString = SunshineDateUtils.getFriendlyDateString(mContext, weatherEntry.getDate(), false);
 
+        /* Get location from shared preferences */
+        String location = SunshinePreferences.getPreferredWeatherLocation(mContext);
+
         int viewType = getItemViewType(position);
         int weatherImageId;
         /* Get icon id and set */
@@ -170,6 +177,8 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
             case VIEW_TYPE_TODAY:
                 weatherImageId = SunshineWeatherUtils
                         .getLargeArtResourceIdForWeatherCondition(weatherEntry.getWeatherId());
+                /* Set location as well */
+                forecastAdapterViewHolder.tvLocation.setText(location);
                 break;
 
             case VIEW_TYPE_FUTURE_DAY:
@@ -179,12 +188,12 @@ public class ForecastAdapter extends RecyclerView.Adapter<ForecastAdapter.Foreca
             default:
                 throw new IllegalArgumentException("Invalid view type, value of " + viewType);
         }
-
         forecastAdapterViewHolder.ivWeatherIconView.setImageResource(weatherImageId);
 
         /* Format temperatures */
         String highString = SunshineWeatherUtils.formatTemperature(mContext, weatherEntry.getMax());
         String lowString = SunshineWeatherUtils.formatTemperature(mContext, weatherEntry.getMin());
+
 
         /* Set TextViews */
         forecastAdapterViewHolder.tvDate.setText(dateString);

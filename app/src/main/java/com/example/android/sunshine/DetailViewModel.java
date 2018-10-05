@@ -12,8 +12,8 @@ public class DetailViewModel extends ViewModel {
     private LiveData<WeatherEntry> mWeatherEntry;
     private final String TAG = this.getClass().getSimpleName();
 
-    public DetailViewModel(AppDatabase db, int weatherEntryId){
-        mWeatherEntry = db.weatherDao().getWeatherById(weatherEntryId);
+    public DetailViewModel(AppDatabase db, long weatherEntryDate){
+        mWeatherEntry = db.weatherDao().getWeatherByDate(weatherEntryDate);
         Log.d(TAG, "Retrieve data from DB for a single day");
     }
 

@@ -153,16 +153,16 @@ public class MainActivity extends AppCompatActivity
      * This method is overridden by our MainActivity class in order to handle RecyclerView item
      * clicks.
      *
-     * @param weatherEntryId The weather entry id for the day that was clicked
+     * @param weatherEntryDate The weather entry date for the day that was clicked
      */
     @Override
-    public void onClick(int weatherEntryId) {
+    public void onClick(long weatherEntryDate) {
         Context context = this;
         /* Start DetailActivity */
         // Make an intent object
         Intent intent = new Intent(context, DetailActivity.class);
         // Put the weather data
-        intent.putExtra(DetailActivity.INTENT_ID_KEY, weatherEntryId);
+        intent.putExtra(DetailActivity.INTENT_DATE_KEY, weatherEntryDate);
         // Start activity
         startActivity(intent);
     }

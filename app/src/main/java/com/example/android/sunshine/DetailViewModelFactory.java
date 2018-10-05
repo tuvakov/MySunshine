@@ -7,17 +7,17 @@ import android.support.annotation.NonNull;
 import com.example.android.sunshine.data.database.AppDatabase;
 
 public class DetailViewModelFactory extends ViewModelProvider.NewInstanceFactory {
-    final private int mWeatherEntryId;
+    final private long mWeatherEntryDate;
     final private AppDatabase mDb;
 
-    public DetailViewModelFactory(int weatherEntryId, AppDatabase db){
-        mWeatherEntryId = weatherEntryId;
+    public DetailViewModelFactory(long weatherEntryDate, AppDatabase db){
+        mWeatherEntryDate = weatherEntryDate;
         mDb = db;
     }
 
     @NonNull
     @Override
     public <T extends ViewModel> T create(@NonNull Class<T> modelClass){
-        return (T) new DetailViewModel(mDb, mWeatherEntryId);
+        return (T) new DetailViewModel(mDb, mWeatherEntryDate);
     }
 }

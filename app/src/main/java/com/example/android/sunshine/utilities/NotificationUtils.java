@@ -6,6 +6,7 @@ import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TaskStackBuilder;
+import android.arch.lifecycle.LiveData;
 import android.content.Context;
 import android.content.Intent;
 import android.content.res.Resources;
@@ -34,8 +35,8 @@ public class NotificationUtils {
     public static void notifyUserOfNewWeather(final Context context) {
 
         long today = SunshineDateUtils.normalizeDate(System.currentTimeMillis());
-        WeatherEntry todayWeather = AppDatabase.getsInstance(context).weatherDao().getWeatherByDate(today);
-
+        LiveData<WeatherEntry> todayLiveData = AppDatabase.getsInstance(context).weatherDao().getWeatherByDate(today);
+        WeatherEntry todayWeather = todayLiveData.getValue();
         /*
          * If our cursor is not null, we want to show the notification.
          */
@@ -76,7 +77,7 @@ public class NotificationUtils {
 
             /* Create an Intent with the weather entry id to start the DetailActivity */
             Intent detailIntentForToday = new Intent(context, DetailActivity.class);
-            detailIntentForToday.putExtra(DetailActivity.INTENT_ID_KEY, todayWeather.getId());
+            detailIntentForToday.putExtra(DetailActivity.INTENT_DATE_KEY, todayWeather.getDate());
 
             /* Use TaskStackBuilder to create the proper PendingIntent */
             TaskStackBuilder taskStackBuilder;

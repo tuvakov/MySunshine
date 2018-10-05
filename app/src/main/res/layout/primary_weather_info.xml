@@ -17,6 +17,23 @@
             app:layout_constraintGuide_percent="0.5"
             tools:layout_editor_absoluteX="192dp"
             tools:layout_editor_absoluteY="0dp"/>
+
+
+        <!-- TextView to hold location -->
+        <TextView
+            android:id="@+id/tv_location"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:fontFamily="sans-serif"
+            android:textAppearance="@style/TextAppearance.AppCompat.Title"
+            android:textColor="@color/colorAccent"
+            android:textSize="16sp"
+            app:layout_constraintBottom_toTopOf="@+id/tv_date"
+            app:layout_constraintEnd_toEndOf="@+id/tv_date"
+            app:layout_constraintHorizontal_bias="0.503"
+            app:layout_constraintStart_toStartOf="@+id/tv_date"
+            tools:text="Seoul, KR" />
+
         <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
          - Selected day's date                                                                   -
          - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->

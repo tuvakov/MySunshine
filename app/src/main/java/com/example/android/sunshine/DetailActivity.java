@@ -1,11 +1,14 @@
 package com.example.android.sunshine;
 
+import com.example.android.sunshine.data.SunshinePreferences;
 import com.example.android.sunshine.databinding.ActivityDetailBinding;
 import android.arch.lifecycle.LiveData;
 import android.arch.lifecycle.Observer;
 import android.arch.lifecycle.ViewModelProviders;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.databinding.DataBindingUtil;
+import android.preference.PreferenceManager;
 import android.support.annotation.Nullable;
 import android.support.v4.app.ShareCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -22,7 +25,8 @@ import com.example.android.sunshine.data.database.WeatherEntry;
 import com.example.android.sunshine.utilities.SunshineDateUtils;
 import com.example.android.sunshine.utilities.SunshineWeatherUtils;
 
-public class DetailActivity extends AppCompatActivity {
+public class DetailActivity extends AppCompatActivity
+        implements SharedPreferences.OnSharedPreferenceChangeListener{
 
     // Log TAG
     private final String TAG = this.getClass().getSimpleName();
@@ -30,10 +34,10 @@ public class DetailActivity extends AppCompatActivity {
     // String that holds weather data to share
     private String mForecastSummary;
     // String constant for Intent key
-    public static final String INTENT_ID_KEY = "weatherEntryId";
-    private final int DEFAULT_WEATHER_ENTRY_ID = 0;
+    public static final String INTENT_DATE_KEY = "weatherEntryDate";
+    private final long DEFAULT_WEATHER_ENTRY_DATE = 0;
     private AppDatabase mDb;
-
+    private WeatherEntry todayEntry;
     private ActivityDetailBinding mDetailBinding;
 
     @Override
@@ -50,12 +54,12 @@ public class DetailActivity extends AppCompatActivity {
         Intent comingIntent = getIntent();
 
         // Check if it has the extra
-        if(comingIntent != null && comingIntent.hasExtra(INTENT_ID_KEY)){
+        if(comingIntent != null && comingIntent.hasExtra(INTENT_DATE_KEY)){
             // Get the extra
-            int weatherId = comingIntent.getIntExtra(INTENT_ID_KEY, DEFAULT_WEATHER_ENTRY_ID);
+            long weatherDate = comingIntent.getLongExtra(INTENT_DATE_KEY, DEFAULT_WEATHER_ENTRY_DATE);
 
             // ViewModelFactory
-            DetailViewModelFactory modelFactory = new DetailViewModelFactory(weatherId, mDb);
+            DetailViewModelFactory modelFactory = new DetailViewModelFactory(weatherDate, mDb);
 
             // ViewModel
             DetailViewModel viewModel =
@@ -66,19 +70,46 @@ public class DetailActivity extends AppCompatActivity {
 
             weather.observe(this, weatherEntry -> {
                 Log.d(TAG, "DB update from LiveData in ViewModel");
-                bindViews(weatherEntry);
+                todayEntry = weatherEntry;
+                /* Bind all the views */
+                bindViews(todayEntry);
             });
         }
+
+
+
+        /* Register the OnSharedPreferencesClickListener */
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .registerOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        /* Unregister the OnSharedPreferencesClickListener */
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
     }
 
     private void bindViews(WeatherEntry weatherEntry) {
 
+        /* Check if weatherEntry is null */
+        if (weatherEntry == null){
+            // TODO: Show error message
+            return;
+        }
+
         /* Read weather condition ID from the cursor (ID provided by Open Weather Map) */
         int weatherId = weatherEntry.getWeatherId();
+
         /* Use our utility method to determine the resource ID for the proper art */
         int weatherImageId = SunshineWeatherUtils.getLargeArtResourceIdForWeatherCondition(weatherId);
         /* Set the resource ID on the icon to display the art */
         mDetailBinding.primaryInfo.ivWeatherIcon.setImageResource(weatherImageId);
+
+        /* Get location from SharedPreferences and set */
+        String location = SunshinePreferences.getPreferredWeatherLocation(this);
+        mDetailBinding.primaryInfo.tvLocation.setText(location);
 
         /* Get user friendly date text and set */
         String dateText = SunshineDateUtils.getFriendlyDateString(this, weatherEntry.getDate(), true);
@@ -112,7 +143,6 @@ public class DetailActivity extends AppCompatActivity {
         mForecastSummary = String.format("%s - %s - %s/%s",
                 dateText, weatherEntry.getDescription(), highString, lowString);
     }
-
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
@@ -167,6 +197,19 @@ public class DetailActivity extends AppCompatActivity {
         // Make sure there is an app to handle this intent and start the intent
         if(intent.resolveActivity(getPackageManager()) != null){
             startActivity(intent);
+        }
+    }
+
+    /**
+     * This method rebinds views when unit shared preference changes
+     * @param sharedPreferences
+     * @param key
+     */
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String key) {
+        if (key.equals(getString(R.string.pref_units_key))) {
+            // Unit has been changed. RebindViews
+            bindViews(todayEntry);
         }
     }
 }
