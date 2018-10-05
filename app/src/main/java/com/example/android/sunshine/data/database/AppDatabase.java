@@ -20,12 +20,13 @@ public abstract class AppDatabase extends RoomDatabase {
     private static final String DATABASE_NAME = "sunshinedb";
     private static AppDatabase sInstance;
 
-    public static AppDatabase getsInstance(Context context){
+    public synchronized static AppDatabase getsInstance(Context context){
         if (sInstance == null){
             synchronized (LOCK){
                 sInstance = Room.databaseBuilder(context.getApplicationContext(),
                         AppDatabase.class, AppDatabase.DATABASE_NAME)
                         .build();
+                Log.d(LOG_TAG, "Made a new instance");
             }
         }
 
